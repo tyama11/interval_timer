@@ -259,7 +259,7 @@
             <h2 id="preset-title">プリセット</h2>
             <div class="preset-buttons">
                 <button class="button preset-button" data-work-min="25" data-work-sec="0" data-rest-min="5" data-rest-sec="0" id="pomodoro-button">ポモドーロ</button>
-                <button class="button preset-button" data-work-min="0" data-work-sec="30" data-rest-min="0" data-rest-sec="10" id="hiit-button">HIIT</button>
+                <button class="button preset-button" data-work-min="0" data-work-sec="20" data-rest-min="0" data-rest-sec="10" data-rounds="8" id="hiit-button">HIIT</button>
                 <button class="button preset-button" data-work-min="1" data-work-sec="0" data-rest-min="1" data-rest-sec="0" id="custom-button">カスタム1分</button>
             </div>
         </div>
@@ -611,7 +611,7 @@
         presetButtons.forEach(button => {
             button.addEventListener('click', () => {
                 workMinInput.value = button.dataset.workMin;
-                workSecInput.value = button.dataset.work-sec;
+                workSecInput.value = button.dataset.workSec;
                 restMinInput.value = button.dataset.restMin;
                 restSecInput.value = button.dataset.restSec;
                 roundsInput.value = button.dataset.rounds || '4'; // デフォルトは4ラウンド
