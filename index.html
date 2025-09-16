@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="HIITやポモドーロトレーニングに最適な、カスタマイズ可能な2連タイマーウェブアプリです。">
-    <title>INTERVAL_TIMER🕰️</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>INTERVAL TIMER</title>
     <style>
+        /* ブラウザに内蔵されたシステムフォントを使用 */
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
             background-color: #f3f4f6;
@@ -15,15 +15,114 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            margin: 0;
+            padding: 1rem;
+            box-sizing: border-box;
         }
+
         .container {
             max-width: 500px;
-            width: 90%;
+            width: 100%;
             background-color: white;
             padding: 2.5rem;
             border-radius: 1.5rem;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            text-align: center;
         }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.75rem;
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .button {
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out, background-color 0.3s ease;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            white-space: nowrap;
+        }
+        
+        .button:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .preset-button {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+
+        .settings-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-container h2 {
+            margin-bottom: 1rem;
+        }
+
+        .settings-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .settings-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .settings-label {
+            font-weight: 600;
+            color: #4b5563;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        input[type="number"] {
+            text-align: center;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            width: 4rem;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        .timer-status {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 1rem;
+            height: 1.5rem;
+        }
+
         .timer-circle {
             position: relative;
             width: 250px;
@@ -34,120 +133,187 @@
             align-items: center;
             font-size: 3rem;
             font-weight: bold;
-            color: #3b82f6;
             transition: all 0.5s ease-in-out;
             border: 8px solid #3b82f6;
             box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.5);
-            margin: 0 auto;
+            margin: 0 auto 1.5rem;
         }
+
         .timer-circle.work {
             border-color: #3b82f6;
             color: #3b82f6;
             box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.5);
         }
+
         .timer-circle.rest {
             border-color: #ef4444;
             color: #ef4444;
             box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.5);
         }
+
         .timer-circle.disabled {
             border-color: #d1d5db;
             color: #d1d5db;
             box-shadow: none;
         }
+
         .pulse {
             animation: pulse-animation 2s infinite;
         }
+
         @keyframes pulse-animation {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-        .button {
-            transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
-        }
-        .button:active {
-            transform: scale(0.98);
-            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-        }
-        .input-group {
+
+        .control-buttons {
             display: flex;
-            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
-        .input-group input {
+
+        .start-button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .start-button:hover { background-color: #2563eb; }
+
+        .pause-button {
+            background-color: #eab308;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .pause-button:hover { background-color: #ca8a04; }
+
+        .reset-button {
+            background-color: #6b7280;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .reset-button:hover { background-color: #4b5563; }
+        
+        .hidden {
+            display: none;
+        }
+
+        .message-box {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(75, 85, 99, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .message-box.visible {
+            display: flex;
+        }
+
+        .message-content {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
             text-align: center;
         }
-        .input-group span {
-            width: 3rem;
+
+        .message-content p {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .message-ok-button {
+            background-color: #3b82f6;
+            color: white;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+        }
+        
+        .message-ok-button:hover {
+            background-color: #2563eb;
         }
     </style>
-    <meta name="google-site-verification" content="mJs5kWIX2rAiS4qcpJBSLBJINuIo4MYwV_XkfVgNrO4" />
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="container text-center rounded-3xl shadow-xl p-8 max-w-sm">
-        <h1 id="app-title" class="text-3xl font-bold mb-6">２連タイマー</h1>
+    <div class="container" role="main">
+        <h1 id="app-title">インターバルタイマー</h1>
         
         <!-- プリセット設定 -->
-        <div class="mb-6">
-            <h2 id="preset-title" class="text-xl font-bold mb-3">プリセット</h2>
-            <div class="grid grid-cols-3 gap-2">
-                <button class="button bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full preset-button" data-work-min="25" data-work-sec="0" data-rest-min="5" data-rest-sec="0" id="pomodoro-button">ポモドーロ</button>
-                <button class="button bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full preset-button" data-work-min="0" data-work-sec="30" data-rest-min="0" data-rest-sec="10" id="hiit-button">HIIT</button>
-                <button class="button bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full preset-button" data-work-min="1" data-work-sec="0" data-rest-min="1" data-rest-sec="0" id="custom-button">カスタム1分</button>
+        <div class="settings-container">
+            <h2 id="preset-title">プリセット</h2>
+            <div class="preset-buttons">
+                <button class="button preset-button" data-work-min="25" data-work-sec="0" data-rest-min="5" data-rest-sec="0" id="pomodoro-button">ポモドーロ</button>
+                <button class="button preset-button" data-work-min="0" data-work-sec="30" data-rest-min="0" data-rest-sec="10" id="hiit-button">HIIT</button>
+                <button class="button preset-button" data-work-min="1" data-work-sec="0" data-rest-min="1" data-rest-sec="0" id="custom-button">カスタム1分</button>
             </div>
         </div>
 
         <!-- カスタム設定 -->
-        <div class="mb-6">
-            <h2 id="settings-title" class="text-xl font-bold mb-4">設定</h2>
+        <div class="settings-container">
+            <h2 id="settings-title">設定</h2>
             <div class="space-y-4">
-                <div class="flex items-center justify-between">
-                    <span id="work-label" class="font-semibold text-gray-700">ワーク時間:</span>
-                    <div class="flex items-center space-x-2">
-                        <input type="number" id="work-min-input" value="25" min="0" class="w-16 text-center border rounded-md py-1 px-2 focus:ring focus:ring-blue-200" aria-label="ワーク時間（分）">
+                <div class="settings-group">
+                    <span id="work-label" class="settings-label">ワーク時間:</span>
+                    <div class="input-group">
+                        <input type="number" id="work-min-input" value="25" min="0" aria-label="ワーク時間（分）">
                         <span id="min-label-1">分</span>
-                        <input type="number" id="work-sec-input" value="0" min="0" max="59" class="w-16 text-center border rounded-md py-1 px-2 focus:ring focus:ring-blue-200" aria-label="ワーク時間（秒）">
+                        <input type="number" id="work-sec-input" value="0" min="0" max="59" aria-label="ワーク時間（秒）">
                         <span id="sec-label-1">秒</span>
                     </div>
                 </div>
-                <div class="flex items-center justify-between">
-                    <span id="rest-label" class="font-semibold text-gray-700">レスト時間:</span>
-                    <div class="flex items-center space-x-2">
-                        <input type="number" id="rest-min-input" value="5" min="0" class="w-16 text-center border rounded-md py-1 px-2 focus:ring focus:ring-blue-200" aria-label="レスト時間（分）">
+                <div class="settings-group">
+                    <span id="rest-label" class="settings-label">レスト時間:</span>
+                    <div class="input-group">
+                        <input type="number" id="rest-min-input" value="5" min="0" aria-label="レスト時間（分）">
                         <span id="min-label-2">分</span>
-                        <input type="number" id="rest-sec-input" value="0" min="0" max="59" class="w-16 text-center border rounded-md py-1 px-2 focus:ring focus:ring-blue-200" aria-label="レスト時間（秒）">
+                        <input type="number" id="rest-sec-input" value="0" min="0" max="59" aria-label="レスト時間（秒）">
                         <span id="sec-label-2">秒</span>
                     </div>
                 </div>
-                <div class="flex items-center justify-between">
-                    <span id="rounds-label" class="font-semibold text-gray-700">繰り返し回数:</span>
-                    <input type="number" id="rounds-input" value="4" min="1" class="w-24 text-center border rounded-md py-1 px-2 focus:ring focus:ring-blue-200" aria-label="繰り返し回数">
+                <div class="settings-group">
+                    <span id="rounds-label" class="settings-label">繰り返し回数:</span>
+                    <input type="number" id="rounds-input" value="4" min="1" aria-label="繰り返し回数">
                 </div>
             </div>
         </div>
 
         <!-- タイマーステータス表示 -->
-        <p id="timer-status" class="text-xl font-semibold text-gray-700 mb-4 h-6">ワーク</p>
+        <p id="timer-status" class="timer-status">ワーク</p>
         
         <!-- タイマー表示部分 -->
-        <div id="timer-display" class="timer-circle mb-6 work" aria-live="polite">
+        <div id="timer-display" class="timer-circle work" aria-live="polite">
             <span id="time-left" role="timer">00:00</span>
         </div>
 
         <!-- コントロールボタン -->
-        <div class="flex justify-center space-x-4 mb-8">
-            <button id="start-button" class="button bg-blue-500 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:bg-blue-600 transition-colors" aria-label="スタート">スタート</button>
-            <button id="pause-button" class="button bg-yellow-500 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:bg-yellow-600 transition-colors hidden" aria-label="ポーズ">ポーズ</button>
-            <button id="reset-button" class="button bg-gray-500 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:bg-gray-600 transition-colors" aria-label="リセット">リセット</button>
+        <div class="control-buttons">
+            <button id="start-button" class="button start-button" aria-label="スタート">スタート</button>
+            <button id="pause-button" class="button pause-button hidden" aria-label="ポーズ">ポーズ</button>
+            <button id="reset-button" class="button reset-button" aria-label="リセット">リセット</button>
         </div>
 
     </div>
 
     <!-- メッセージボックス (alertの代わり) -->
-    <div id="message-box" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="message-title">
-        <div class="bg-white p-6 rounded-lg shadow-xl text-center">
-            <p id="message-text" class="text-lg font-semibold mb-4"></p>
-            <button id="message-ok-button" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-full">OK</button>
+    <div id="message-box" class="message-box" role="dialog" aria-modal="true">
+        <div class="message-content">
+            <p id="message-text"></p>
+            <button id="message-ok-button" class="button message-ok-button">OK</button>
         </div>
     </div>
 
@@ -293,15 +459,15 @@
         // メッセージボックスを表示する関数 (alertの代わり)
         function showMessageBox(message) {
             messageText.textContent = message;
-            messageBox.classList.remove('hidden');
-            messageBox.classList.add('flex');
+            messageBox.classList.add('visible');
+            messageBox.setAttribute('aria-hidden', 'false');
             messageBox.focus(); // フォーカスを移動してアクセシビリティを向上
         }
 
         // メッセージボックスを非表示にするイベントリスナー
         messageOkButton.addEventListener('click', () => {
-            messageBox.classList.remove('flex');
-            messageBox.classList.add('hidden');
+            messageBox.classList.remove('visible');
+            messageBox.setAttribute('aria-hidden', 'true');
         });
 
         // タイマーの初期化
