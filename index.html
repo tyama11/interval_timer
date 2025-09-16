@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HIITやポモドーロトレーニングに最適な、カスタマイズ可能な2連タイマーウェブアプリです。">
+    <title>INTERVAL_TIMER🕰️</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            /* ブラウザに内蔵されたシステムフォントを使用 */
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            background-color: #f3f4f6;
+            color: #1f2937;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 500px;
+            width: 90%;
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .timer-circle {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: bold;
+            color: #3b82f6;
+            transition: all 0.5s ease-in-out;
+            border: 8px solid #3b82f6;
+            box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.5);
+            margin: 0 auto;
+        }
+        .timer-circle.work {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        .timer-circle.rest {
+            border-color: #ef4444;
+            color: #ef4444;
+            box-shadow: inset 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        .timer-circle.disabled {
+            border-color: #d1d5db;
+            color: #d1d5db;
+            box-shadow: none;
+        }
+        .pulse {
+            animation: pulse-animation 2s infinite;
+        }
+        @keyframes pulse-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .button {
+            transition: transform 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+        }
+        .button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+        .input-group input {
+            text-align: center;
+        }
+        .input-group span {
+            width: 3rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="container text-center rounded-3xl shadow-xl p-8 max-w-sm">
+        <h1 id="app-title" class="text-3xl font-bold mb-6">２連タイマー</h1>
+        
+        <!-- プリセット設定 -->
+        <div class="mb-6">
+            <h2 id="preset-title" class="text-xl font-bold mb-3">プリセット</h2>
+            <div class="grid grid-cols-3 gap-2">
+                <button class="button bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full preset-button" data-work-min="25" data-work-sec="0" data-rest-min="5" data-rest-sec="0" id="pomodoro-button">ポモドーロ</button>
+                <button class="button bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full preset-button" data-work-min="0" data-work-sec="30" data-rest-min="0" data-rest-sec="10" id="hiit-button">HIIT</button>
+                <button class="button bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-full preset-button" data-work-min="1" data-work-sec="0" data-rest-min="1" data-rest-sec="0" id="custom-button">カスタム1分</button>
+            </div>
+        </div>
+
+        <!-- カスタム設定 -->
+        <div class="mb-6">
+            <h2 id="settings-title" class="text-xl font-bold mb-4">設定</h2>
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <span id="work-label" class="font-semibold text-gray-700">ワーク時間:</span>
+                    <div class="flex items-center space-x-2">
+                        <input type="number" id="work-min-input" value="25" min="0" class="w-16 text-center border rounded-md py-1 px-2 focus:ring focus:ring-blue-200" aria-label="ワーク時間（分）">
+                        <span id="min-label-1">分</span>
+                        <input type="number" id="work-sec-input" value="0" min="0" max="59" class="w-16 text-center border rounded-md py-1 px-2 focus:ring focus:ring-blue-200" aria-label="ワーク時間（秒）">
+                        <span id="sec-label-1">秒</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span id="rest-label" class="font-semibold text-gray-700">レスト時間:</span>
+                    <div class="flex items-center space-x-2">
+                        <input type="number" id="rest-min-input" value="5" min="0" class="w-16 text-center border rounded-md py-1 px-2 focus:ring focus:ring-blue-200" aria-label="レスト時間（分）">
+                        <span id="min-label-2">分</span>
+                        <input type="number" id="rest-sec-input" value="0" min="0" max="59" class="w-16 text-center border rounded-md py-1 px-2 focus:ring focus:ring-blue-200" aria-label="レスト時間（秒）">
+                        <span id="sec-label-2">秒</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span id="rounds-label" class="font-semibold text-gray-700">繰り返し回数:</span>
+                    <input type="number" id="rounds-input" value="4" min="1" class="w-24 text-center border rounded-md py-1 px-2 focus:ring focus:ring-blue-200" aria-label="繰り返し回数">
+                </div>
+            </div>
+        </div>
+
+        <!-- タイマーステータス表示 -->
+        <p id="timer-status" class="text-xl font-semibold text-gray-700 mb-4 h-6">ワーク</p>
+        
+        <!-- タイマー表示部分 -->
+        <div id="timer-display" class="timer-circle mb-6 work" aria-live="polite">
+            <span id="time-left" role="timer">00:00</span>
+        </div>
+
+        <!-- コントロールボタン -->
+        <div class="flex justify-center space-x-4 mb-8">
+            <button id="start-button" class="button bg-blue-500 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:bg-blue-600 transition-colors" aria-label="スタート">スタート</button>
+            <button id="pause-button" class="button bg-yellow-500 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:bg-yellow-600 transition-colors hidden" aria-label="ポーズ">ポーズ</button>
+            <button id="reset-button" class="button bg-gray-500 text-white font-bold py-3 px-6 rounded-full shadow-lg hover:bg-gray-600 transition-colors" aria-label="リセット">リセット</button>
+        </div>
+
+    </div>
+
+    <!-- メッセージボックス (alertの代わり) -->
+    <div id="message-box" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="message-title">
+        <div class="bg-white p-6 rounded-lg shadow-xl text-center">
+            <p id="message-text" class="text-lg font-semibold mb-4"></p>
+            <button id="message-ok-button" class="bg-blue-500 text-white font-bold py-2 px-4 rounded-full">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // DOM要素の取得
+        const startButton = document.getElementById('start-button');
+        const pauseButton = document.getElementById('pause-button');
+        const resetButton = document.getElementById('reset-button');
+        const timerDisplay = document.getElementById('timer-display');
+        const timeLeftSpan = document.getElementById('time-left');
+        const timerStatus = document.getElementById('timer-status');
+        const presetButtons = document.querySelectorAll('.preset-button');
+        const workMinInput = document.getElementById('work-min-input');
+        const workSecInput = document.getElementById('work-sec-input');
+        const restMinInput = document.getElementById('rest-min-input');
+        const restSecInput = document.getElementById('rest-sec-input');
+        const roundsInput = document.getElementById('rounds-input');
+        const messageBox = document.getElementById('message-box');
+        const messageText = document.getElementById('message-text');
+        const messageOkButton = document.getElementById('message-ok-button');
+
+        // 多言語対応のためのテキストデータ
+        const translations = {
+            'ja': {
+                'app-title': '２連タイマー',
+                'preset-title': 'プリセット',
+                'pomodoro-button': 'ポモドーロ',
+                'hiit-button': 'HIIT',
+                'custom-button': 'カスタム1分',
+                'settings-title': '設定',
+                'work-label': 'ワーク時間:',
+                'rest-label': 'レスト時間:',
+                'rounds-label': '繰り返し回数:',
+                'min-label': '分',
+                'sec-label': '秒',
+                'start-button': 'スタート',
+                'pause-button': 'ポーズ',
+                'reset-button': 'リセット',
+                'work-phase-status': 'ワーク',
+                'rest-phase-status': 'レスト',
+                'message-invalid-input': '無効な値です。時間と回数には正の数字を入力してください。',
+                'message-complete': 'お疲れ様でした！すべてのラウンドが終了しました。'
+            },
+            'en': {
+                'app-title': 'Dual Timer',
+                'preset-title': 'Presets',
+                'pomodoro-button': 'Pomodoro',
+                'hiit-button': 'HIIT',
+                'custom-button': 'Custom 1min',
+                'settings-title': 'Settings',
+                'work-label': 'Work Time:',
+                'rest-label': 'Rest Time:',
+                'rounds-label': 'Rounds:',
+                'min-label': 'min',
+                'sec-label': 'sec',
+                'start-button': 'Start',
+                'pause-button': 'Pause',
+                'reset-button': 'Reset',
+                'work-phase-status': 'Work',
+                'rest-phase-status': 'Rest',
+                'message-invalid-input': 'Invalid values. Please enter positive numbers for time and rounds.',
+                'message-complete': 'Congratulations! All rounds are complete.'
+            },
+            'zh': {
+                'app-title': '双重计时器',
+                'preset-title': '预设',
+                'pomodoro-button': '番茄工作法',
+                'hiit-button': '高强度间歇训练',
+                'custom-button': '自定义1分钟',
+                'settings-title': '设置',
+                'work-label': '工作时间:',
+                'rest-label': '休息时间:',
+                'rounds-label': '重复次数:',
+                'min-label': '分',
+                'sec-label': '秒',
+                'start-button': '开始',
+                'pause-button': '暂停',
+                'reset-button': '重置',
+                'work-phase-status': '工作',
+                'rest-phase-status': '休息',
+                'message-invalid-input': '输入无效。请为时间和次数输入正数。',
+                'message-complete': '恭喜！所有回合已完成。'
+            }
+        };
+
+        // ブラウザの言語を取得し、テキストを切り替える
+        function setLanguage() {
+            const lang = navigator.language.split('-')[0];
+            const currentLang = translations[lang] ? lang : 'en';
+            document.documentElement.lang = currentLang;
+
+            document.getElementById('app-title').textContent = translations[currentLang]['app-title'];
+            document.getElementById('preset-title').textContent = translations[currentLang]['preset-title'];
+            document.getElementById('pomodoro-button').textContent = translations[currentLang]['pomodoro-button'];
+            document.getElementById('hiit-button').textContent = translations[currentLang]['hiit-button'];
+            document.getElementById('custom-button').textContent = translations[currentLang]['custom-button'];
+            document.getElementById('settings-title').textContent = translations[currentLang]['settings-title'];
+            document.getElementById('work-label').textContent = translations[currentLang]['work-label'];
+            document.getElementById('rest-label').textContent = translations[currentLang]['rest-label'];
+            document.getElementById('rounds-label').textContent = translations[currentLang]['rounds-label'];
+            document.getElementById('min-label-1').textContent = translations[currentLang]['min-label'];
+            document.getElementById('min-label-2').textContent = translations[currentLang]['min-label'];
+            document.getElementById('sec-label-1').textContent = translations[currentLang]['sec-label'];
+            document.getElementById('sec-label-2').textContent = translations[currentLang]['sec-label'];
+            document.getElementById('start-button').textContent = translations[currentLang]['start-button'];
+            document.getElementById('pause-button').textContent = translations[currentLang]['pause-button'];
+            document.getElementById('reset-button').textContent = translations[currentLang]['reset-button'];
+            updateStatus();
+        }
+
+        document.addEventListener('DOMContentLoaded', setLanguage);
+        
+        // Web Audio APIのコンテキストを作成
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        // ビープ音を再生する関数
+        function playBeep() {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 440; // 440Hzの音
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(1, audioContext.currentTime + 0.01);
+            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + 0.1);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+
+        // タイマーの状態管理変数
+        let timer;
+        let isRunning = false;
+        let isWorkPhase = true;
+        let totalSeconds;
+        let currentRounds;
+        let workDuration;
+        let restDuration;
+        let totalRounds;
+
+        // メッセージボックスを表示する関数 (alertの代わり)
+        function showMessageBox(message) {
+            messageText.textContent = message;
+            messageBox.classList.remove('hidden');
+            messageBox.classList.add('flex');
+            messageBox.focus(); // フォーカスを移動してアクセシビリティを向上
+        }
+
+        // メッセージボックスを非表示にするイベントリスナー
+        messageOkButton.addEventListener('click', () => {
+            messageBox.classList.remove('flex');
+            messageBox.classList.add('hidden');
+        });
+
+        // タイマーの初期化
+        function initializeTimer(workMin, workSec, restMin, restSec, rounds) {
+            clearInterval(timer);
+            isRunning = false;
+            isWorkPhase = true;
+
+            const workInput = parseInt(workMin, 10) * 60 + parseInt(workSec, 10);
+            const restInput = parseInt(restMin, 10) * 60 + parseInt(restSec, 10);
+            const roundsInputVal = parseInt(rounds, 10);
+
+            if (isNaN(workInput) || isNaN(restInput) || isNaN(roundsInputVal) || workInput < 0 || restInput < 0 || roundsInputVal < 1) {
+                const lang = document.documentElement.lang;
+                showMessageBox(translations[lang]['message-invalid-input']);
+                return;
+            }
+
+            workDuration = workInput;
+            restDuration = restInput;
+            totalRounds = roundsInputVal;
+            currentRounds = 1;
+            totalSeconds = workDuration;
+
+            updateDisplay();
+            updateStatus();
+            updateButtons();
+            updateTimerCircle();
+        }
+
+        // 表示を更新する関数
+        function updateDisplay() {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            timeLeftSpan.textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // ステータスを更新する関数
+        function updateStatus() {
+            const lang = document.documentElement.lang;
+            const phaseText = isWorkPhase ? translations[lang]['work-phase-status'] : translations[lang]['rest-phase-status'];
+            timerStatus.textContent = `${phaseText} (${currentRounds}/${totalRounds})`;
+        }
+
+        // ボタンの表示を更新する関数
+        function updateButtons() {
+            if (isRunning) {
+                startButton.classList.add('hidden');
+                pauseButton.classList.remove('hidden');
+            } else {
+                startButton.classList.remove('hidden');
+                pauseButton.classList.add('hidden');
+            }
+        }
+
+        // タイマーサークルのスタイルを更新する関数
+        function updateTimerCircle() {
+            timerDisplay.classList.remove('work', 'rest', 'disabled', 'pulse');
+            if (isRunning) {
+                timerDisplay.classList.add(isWorkPhase ? 'work' : 'rest', 'pulse');
+            } else {
+                timerDisplay.classList.add('disabled');
+            }
+        }
+
+        // タイマーをスタートさせる関数
+        function startTimer() {
+            if (isRunning) return;
+
+            isRunning = true;
+            updateButtons();
+            updateTimerCircle();
+
+            timer = setInterval(() => {
+                // 終了5秒前のビープ音
+                if (totalSeconds <= 5 && totalSeconds > 0) {
+                    playBeep();
+                }
+
+                totalSeconds--;
+                if (totalSeconds < 0) {
+                    // フェーズを切り替える
+                    isWorkPhase = !isWorkPhase;
+                    if (isWorkPhase) {
+                        currentRounds++;
+                    }
+
+                    if (currentRounds > totalRounds) {
+                        // 全ラウンド終了
+                        clearInterval(timer);
+                        isRunning = false;
+                        const lang = document.documentElement.lang;
+                        showMessageBox(translations[lang]['message-complete']);
+                        initializeTimer(
+                            workMinInput.value, workSecInput.value,
+                            restMinInput.value, restSecInput.value,
+                            roundsInput.value
+                        );
+                        return;
+                    }
+
+                    // 新しいフェーズの時間を設定
+                    totalSeconds = isWorkPhase ? workDuration : restDuration;
+                    updateStatus();
+                    updateTimerCircle();
+                }
+                updateDisplay();
+            }, 1000);
+        }
+
+        // タイマーをポーズする関数
+        function pauseTimer() {
+            if (!isRunning) return;
+
+            isRunning = false;
+            clearInterval(timer);
+            updateButtons();
+            updateTimerCircle();
+        }
+
+        // タイマーをリセットする関数
+        function resetTimer() {
+            if (isRunning) {
+                pauseTimer();
+            }
+            initializeTimer(
+                workMinInput.value, workSecInput.value,
+                restMinInput.value, restSecInput.value,
+                roundsInput.value
+            );
+        }
+
+        // イベントリスナーの追加
+        startButton.addEventListener('click', startTimer);
+        pauseButton.addEventListener('click', pauseTimer);
+        resetButton.addEventListener('click', resetTimer);
+
+        // プリセットボタンのイベントリスナー
+        presetButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                workMinInput.value = button.dataset.workMin;
+                workSecInput.value = button.dataset.workSec;
+                restMinInput.value = button.dataset.restMin;
+                restSecInput.value = button.dataset.restSec;
+                roundsInput.value = button.dataset.rounds || '4'; // デフォルトは4ラウンド
+                resetTimer();
+            });
+        });
+
+        // カスタム設定の入力値を変更した際にタイマーを自動リセット
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', () => {
+                resetTimer();
+            });
+        });
+
+        // 初期設定
+        initializeTimer(
+            workMinInput.value, workSecInput.value,
+            restMinInput.value, restSecInput.value,
+            roundsInput.value
+        );
+    </script>
+</body>
+</html>
