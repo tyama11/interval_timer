@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEOと多言語対応のためのメタタグ -->
     <meta name="description" content="HIITやポモドーロトレーニングに最適な、カスタマイズ可能な2連タイマーウェブアプリです。">
-    <title>INTERVAL TIMER</title>
+    <title>２連タイマー</title>
     <style>
         /* ブラウザに内蔵されたシステムフォントを使用 */
         body {
@@ -69,7 +70,7 @@
 
         .preset-button {
             background-color: #e5e7eb;
-            color: #4b5563;
+            color: #1f2937; /* コントラスト比を改善 */
         }
 
         .settings-container {
@@ -152,8 +153,8 @@
         }
 
         .timer-circle.disabled {
-            border-color: #d1d5db;
-            color: #d1d5db;
+            border-color: #1f2937; /* コントラスト比を改善 */
+            color: #1f2937; /* コントラスト比を改善 */
             box-shadow: none;
         }
 
@@ -251,7 +252,7 @@
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
     <div class="container" role="main">
-        <h1 id="app-title">インターバルタイマー</h1>
+        <h1 id="app-title">２連タイマー</h1>
         
         <!-- プリセット設定 -->
         <div class="settings-container">
@@ -338,7 +339,7 @@
         // 多言語対応のためのテキストデータ
         const translations = {
             'ja': {
-                'app-title': 'インターバルタイマー',
+                'app-title': '２連タイマー',
                 'preset-title': 'プリセット',
                 'pomodoro-button': 'ポモドーロ',
                 'hiit-button': 'HIIT',
@@ -358,7 +359,7 @@
                 'message-complete': 'お疲れ様でした！すべてのラウンドが終了しました。'
             },
             'en': {
-                'app-title': 'Interval Timer',
+                'app-title': 'Dual Timer',
                 'preset-title': 'Presets',
                 'pomodoro-button': 'Pomodoro',
                 'hiit-button': 'HIIT',
@@ -610,7 +611,7 @@
         presetButtons.forEach(button => {
             button.addEventListener('click', () => {
                 workMinInput.value = button.dataset.workMin;
-                workSecInput.value = button.dataset.workSec;
+                workSecInput.value = button.dataset.work-sec;
                 restMinInput.value = button.dataset.restMin;
                 restSecInput.value = button.dataset.restSec;
                 roundsInput.value = button.dataset.rounds || '4'; // デフォルトは4ラウンド
