@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEOと多言語対応のためのメタタグ -->
     <meta name="description" content="HIITやポモドーロトレーニングに最適な、カスタマイズ可能な2連タイマーウェブアプリです。">
     <title>インターバルタイマー</title>
     <style>
@@ -175,13 +176,13 @@
         }
 
         .start-button {
-            background-color: #3b82f6;
+            background-color: #000000; /* コントラスト比を改善 */
             color: white;
             padding: 0.75rem 1.5rem;
             border-radius: 9999px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        .start-button:hover { background-color: #2563eb; }
+        .start-button:hover { background-color: #262626; } /* ホバー時の色も調整 */
 
         .pause-button {
             background-color: #eab308;
@@ -378,7 +379,7 @@
                 'message-complete': 'Congratulations! All rounds are complete.'
             },
             'zh': {
-                'app-title': '双重计时器',
+                'app-title': '间隔计时器',
                 'preset-title': '预设',
                 'pomodoro-button': '番茄工作法',
                 'hiit-button': '高强度间歇训练',
