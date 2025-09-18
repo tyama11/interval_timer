@@ -157,6 +157,12 @@
             color: #1f2937; /* コントラスト比を改善 */
             box-shadow: none;
         }
+        
+        .timer-circle.prepare {
+            border-color: #eab308;
+            color: #eab308;
+            box-shadow: inset 0 0 10px rgba(234, 179, 8, 0.5);
+        }
 
         .pulse {
             animation: pulse-animation 2s infinite;
@@ -353,6 +359,7 @@
                 'start-button': 'スタート',
                 'pause-button': 'ポーズ',
                 'reset-button': 'リセット',
+                'prepare-phase-status': '準備',
                 'work-phase-status': 'ワーク',
                 'rest-phase-status': 'レスト',
                 'message-invalid-input': '無効な値です。時間と回数には正の数字を入力してください。',
@@ -373,6 +380,7 @@
                 'start-button': 'Start',
                 'pause-button': 'Pause',
                 'reset-button': 'Reset',
+                'prepare-phase-status': 'Preparation',
                 'work-phase-status': 'Work',
                 'rest-phase-status': 'Rest',
                 'message-invalid-input': 'Invalid values. Please enter positive numbers for time and rounds.',
@@ -393,6 +401,7 @@
                 'start-button': '开始',
                 'pause-button': '暂停',
                 'reset-button': '重置',
+                'prepare-phase-status': '准备',
                 'work-phase-status': '工作',
                 'rest-phase-status': '休息',
                 'message-invalid-input': '输入无效。请为时间和次数输入正数。',
@@ -450,12 +459,14 @@
         // タイマーの状態管理変数
         let timer;
         let isRunning = false;
-        let isWorkPhase = true;
+        let isWorkPhase = false; // 初期状態は準備フェーズ
+        let isPrepPhase = true;
         let totalSeconds;
         let currentRounds;
         let workDuration;
         let restDuration;
         let totalRounds;
+        const prepDuration = 10; // 準備時間（秒）
 
         // メッセージボックスを表示する関数 (alertの代わり)
         function showMessageBox(message) {
@@ -475,7 +486,8 @@
         function initializeTimer(workMin, workSec, restMin, restSec, rounds) {
             clearInterval(timer);
             isRunning = false;
-            isWorkPhase = true;
+            isWorkPhase = false;
+            isPrepPhase = true;
 
             const workInput = parseInt(workMin, 10) * 60 + parseInt(workSec, 10);
             const restInput = parseInt(restMin, 10) * 60 + parseInt(restSec, 10);
@@ -491,7 +503,7 @@
             restDuration = restInput;
             totalRounds = roundsInputVal;
             currentRounds = 1;
-            totalSeconds = workDuration;
+            totalSeconds = prepDuration; // 初期状態は準備時間
 
             updateDisplay();
             updateStatus();
@@ -510,7 +522,14 @@
         // ステータスを更新する関数
         function updateStatus() {
             const lang = document.documentElement.lang;
-            const phaseText = isWorkPhase ? translations[lang]['work-phase-status'] : translations[lang]['rest-phase-status'];
+            let phaseText;
+            if (isPrepPhase) {
+                phaseText = translations[lang]['prepare-phase-status'];
+            } else if (isWorkPhase) {
+                phaseText = translations[lang]['work-phase-status'];
+            } else {
+                phaseText = translations[lang]['rest-phase-status'];
+            }
             timerStatus.textContent = `${phaseText} (${currentRounds}/${totalRounds})`;
         }
 
@@ -527,9 +546,15 @@
 
         // タイマーサークルのスタイルを更新する関数
         function updateTimerCircle() {
-            timerDisplay.classList.remove('work', 'rest', 'disabled', 'pulse');
+            timerDisplay.classList.remove('work', 'rest', 'disabled', 'prepare', 'pulse');
             if (isRunning) {
-                timerDisplay.classList.add(isWorkPhase ? 'work' : 'rest', 'pulse');
+                if (isPrepPhase) {
+                    timerDisplay.classList.add('prepare', 'pulse');
+                } else if (isWorkPhase) {
+                    timerDisplay.classList.add('work', 'pulse');
+                } else {
+                    timerDisplay.classList.add('rest', 'pulse');
+                }
             } else {
                 timerDisplay.classList.add('disabled');
             }
@@ -551,28 +576,36 @@
 
                 totalSeconds--;
                 if (totalSeconds < 0) {
-                    // フェーズを切り替える
-                    isWorkPhase = !isWorkPhase;
-                    if (isWorkPhase) {
+                    if (isPrepPhase) {
+                        // 準備フェーズからワークフェーズへ
+                        isPrepPhase = false;
+                        isWorkPhase = true;
+                        totalSeconds = workDuration;
+                    } else if (isWorkPhase) {
+                        if (currentRounds < totalRounds) {
+                            // ワークフェーズからレストフェーズへ
+                            isWorkPhase = false;
+                            totalSeconds = restDuration;
+                        } else {
+                            // 最後のワークフェーズが終了
+                            clearInterval(timer);
+                            isRunning = false;
+                            const lang = document.documentElement.lang;
+                            showMessageBox(translations[lang]['message-complete']);
+                            // 初期状態に戻す
+                            initializeTimer(
+                                workMinInput.value, workSecInput.value,
+                                restMinInput.value, restSecInput.value,
+                                roundsInput.value
+                            );
+                            return;
+                        }
+                    } else {
+                        // レストフェーズからワークフェーズへ
+                        isWorkPhase = true;
                         currentRounds++;
+                        totalSeconds = workDuration;
                     }
-
-                    if (currentRounds > totalRounds) {
-                        // 全ラウンド終了
-                        clearInterval(timer);
-                        isRunning = false;
-                        const lang = document.documentElement.lang;
-                        showMessageBox(translations[lang]['message-complete']);
-                        initializeTimer(
-                            workMinInput.value, workSecInput.value,
-                            restMinInput.value, restSecInput.value,
-                            roundsInput.value
-                        );
-                        return;
-                    }
-
-                    // 新しいフェーズの時間を設定
-                    totalSeconds = isWorkPhase ? workDuration : restDuration;
                     updateStatus();
                     updateTimerCircle();
                 }
